@@ -1,0 +1,17 @@
+import { connection } from "next/server";
+import { NextResponse } from "next/server";
+
+import { jsonError } from "@/lib/http";
+import { assertIpLimit, clientIp } from "@/lib/limits";
+import { getInbox, resetDemo } from "@/lib/store";
+
+export async function POST(request: Request) {
+  await connection();
+  try {
+    assertIpLimit(clientIp(request));
+    await resetDemo();
+    return NextResponse.json(await getInbox());
+  } catch (error) {
+    return jsonError(error);
+  }
+}

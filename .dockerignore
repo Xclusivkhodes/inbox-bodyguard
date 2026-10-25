@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+data
+uploads
+hackathon
+test-results
+playwright-report
+.git
+.env
+.env.*
+!.env.example
+*.md
+!README.md
+!LICENSES.md

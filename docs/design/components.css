@@ -1,0 +1,182 @@
+/* Inbox Bodyguard — component classes. Requires tokens.css.
+   Prefix: ib-. Works with or without Tailwind (plain CSS on top of tokens).
+   Every colour here is a semantic token, so the theme (OS, data-theme or .dark) flips everything. */
+
+/* ---------- base ---------- */
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+body { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--text-base-lh); color: var(--text); background: var(--bg); font-feature-settings: "ss01", "cv11"; }
+::selection { background: var(--accent-subtle); color: var(--text); }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+.ib-mono { font-family: var(--font-mono); font-feature-settings: "zero"; }
+.ib-display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+.ib-tabular { font-variant-numeric: tabular-nums; }
+.ib-eyebrow { font-size: var(--text-2xs); line-height: var(--text-2xs-lh); font-weight: 500; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--text-tertiary); }
+.ib-icon { width: 16px; height: 16px; stroke-width: 1.75; flex: none; }
+.ib-icon-sm { width: 14px; height: 14px; stroke-width: 2; flex: none; }
+.ib-icon-xs { width: 12px; height: 12px; stroke-width: 2.25; flex: none; }
+
+/* ---------- buttons ---------- */
+.ib-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: var(--radius-md);
+  font: 500 var(--text-sm)/1 var(--font-sans); letter-spacing: -0.005em; white-space: nowrap; border: 1px solid transparent; cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast), color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast); }
+.ib-btn:active { transform: translateY(0.5px); }
+.ib-btn-sm { height: 28px; padding: 0 10px; font-size: var(--text-xs); border-radius: var(--radius-sm); gap: 6px; }
+.ib-btn-lg { height: 42px; padding: 0 18px; font-size: var(--text-base); border-radius: var(--radius-lg); }
+.ib-btn-primary { background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255,255,255,.14); }
+.ib-btn-primary:hover { background: var(--accent-hover); }
+.ib-btn-secondary { background: var(--surface-raised); color: var(--text); border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+.ib-btn-secondary:hover { background: var(--surface-hover); }
+.ib-btn-ghost { background: transparent; color: var(--text-secondary); }
+.ib-btn-ghost:hover { background: var(--surface-hover); color: var(--text); }
+.ib-btn-danger { background: transparent; color: var(--guard-blocked); border-color: var(--guard-blocked-border); }
+.ib-btn-danger:hover { background: var(--guard-blocked-bg); }
+.ib-btn-approve { background: var(--text); color: var(--text-inverse); box-shadow: var(--shadow-sm); }
+.ib-btn[disabled] { opacity: .45; pointer-events: none; }
+.ib-kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 4px;
+  font: 500 10.5px/1 var(--font-mono); color: inherit; opacity: .72; border: 1px solid currentColor; border-color: color-mix(in srgb, currentColor 28%, transparent); }
+
+/* ---------- surfaces ---------- */
+.ib-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
+.ib-card-flat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.ib-panel { background: var(--surface); border-left: 1px solid var(--border); }
+.ib-divider { height: 1px; background: var(--border); border: 0; }
+.ib-input { height: 36px; width: 100%; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid var(--border-strong); background: var(--surface);
+  color: var(--text); font: 400 var(--text-sm)/1 var(--font-sans); transition: border-color var(--duration-fast), box-shadow var(--duration-fast); }
+.ib-input::placeholder { color: var(--text-tertiary); }
+.ib-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
+
+/* ---------- guard badges (shield-shaped icon + label) ---------- */
+.ib-guard { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px 0 6px; border-radius: var(--radius-full);
+  font: 500 var(--text-xs)/1 var(--font-sans); border: 1px solid; white-space: nowrap; }
+.ib-guard svg { width: 12px; height: 12px; stroke-width: 2.25; }
+.ib-guard--blocked { color: var(--guard-blocked); background: var(--guard-blocked-bg); border-color: var(--guard-blocked-border); }
+.ib-guard--flagged { color: var(--guard-flagged); background: var(--guard-flagged-bg); border-color: var(--guard-flagged-border); }
+.ib-guard--safe    { color: var(--guard-safe);    background: var(--guard-safe-bg);    border-color: var(--guard-safe-border); }
+.ib-guard--scanning{ color: var(--text-secondary); background: var(--surface-sunken); border-color: var(--border); }
+.ib-guard--quiet   { background: transparent; border-color: transparent; padding: 0; height: auto; }
+
+/* ---------- action states (square-ish pill + dot) ---------- */
+.ib-action { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: var(--radius-sm);
+  font: 500 var(--text-xs)/1 var(--font-sans); border: 1px solid; white-space: nowrap; }
+.ib-action::before { content: ""; width: 6px; height: 6px; border-radius: 2px; background: currentColor; }
+.ib-action--drafted { color: var(--action-drafted); background: var(--action-drafted-bg); border-color: var(--action-drafted-border); }
+.ib-action--pending { color: var(--action-pending); background: var(--action-pending-bg); border-color: var(--action-pending-border); }
+.ib-action--pending::before { animation: ib-pulse 1.6s ease-in-out infinite; border-radius: 99px; }
+.ib-action--sent    { color: var(--action-sent); background: var(--action-sent-bg); border-color: var(--action-sent-border); }
+
+/* ---------- tags ---------- */
+.ib-tag { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: var(--radius-xs);
+  font: 500 var(--text-2xs)/1 var(--font-sans); color: var(--text-secondary); background: var(--surface-sunken); border: 1px solid var(--border); white-space: nowrap; }
+
+/* ---------- memory chips ---------- */
+.ib-memory { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-height: 26px; padding: 4px 10px 4px 8px; border-radius: var(--radius-full);
+  font: 400 var(--text-xs)/16px var(--font-sans); color: var(--text); background: var(--model-memory-bg);
+  border: 1px solid var(--action-drafted-border); }
+.ib-memory svg { width: 12px; height: 12px; color: var(--model-memory); stroke-width: 2.25; flex: none; }
+.ib-memory b { font-weight: 500; }
+.ib-memory .ib-memory-src { color: var(--text-tertiary); font-size: var(--text-2xs); }
+
+/* ---------- model tags: who did this? ---------- */
+.ib-model { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px 0 4px; border-radius: var(--radius-sm);
+  font: 500 var(--text-2xs)/1 var(--font-sans); color: var(--text-secondary); background: var(--surface-sunken); border: 1px solid var(--border); white-space: nowrap; }
+.ib-model-glyph { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; color: #fff; flex: none; }
+.ib-model-glyph svg { width: 10px; height: 10px; stroke-width: 2.5; }
+.ib-model--guard  .ib-model-glyph, .ib-lane--guard  { background: var(--model-guard); }
+.ib-model--reason .ib-model-glyph, .ib-lane--reason { background: var(--model-reason); }
+.ib-model--memory .ib-model-glyph, .ib-lane--memory { background: var(--model-memory); }
+.ib-model--tool   .ib-model-glyph, .ib-lane--tool   { background: var(--model-tool); }
+.dark .ib-model-glyph, [data-theme="dark"] .ib-model-glyph { color: var(--ink-1000); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not(.light) .ib-model-glyph { color: var(--ink-1000); } }
+.ib-model b { color: var(--text); font-weight: 500; }
+.ib-model .ib-model-meta { font-family: var(--font-mono); color: var(--text-tertiary); font-size: 10.5px; }
+
+/* ---------- severity meter ---------- */
+.ib-sev { display: inline-flex; gap: 3px; }
+.ib-sev i { width: 14px; height: 6px; border-radius: 2px; background: var(--border-strong); }
+.ib-sev[data-level="4"] i { background: var(--guard-blocked-solid); }
+.ib-sev[data-level="3"] i:nth-child(-n+3) { background: var(--guard-blocked-solid); }
+.ib-sev[data-level="2"] i:nth-child(-n+2) { background: var(--guard-flagged-solid); }
+.ib-sev[data-level="1"] i:nth-child(-n+1) { background: var(--guard-flagged-solid); }
+
+/* ---------- hidden-text reveal ---------- */
+.ib-reveal { background: var(--reveal-bg); color: var(--reveal-text); border-radius: 4px; padding: 1px 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  outline: 1px dashed var(--guard-blocked-border); outline-offset: 1px; }
+.ib-reveal-label { display: inline-flex; align-items: center; gap: 4px; font: 500 10px/1 var(--font-mono); letter-spacing: .02em; text-transform: uppercase;
+  color: var(--text-inverse); background: var(--guard-blocked-solid); padding: 3px 5px; border-radius: 3px; vertical-align: 2px; }
+
+/* ---------- timeline (evidence) ---------- */
+.ib-timeline { position: relative; }
+.ib-step { position: relative; display: grid; grid-template-columns: 32px 1fr; gap: 14px; }
+.ib-step-node { position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: #fff; box-shadow: 0 0 0 4px var(--bg); }
+.dark .ib-step-node, [data-theme="dark"] .ib-step-node { color: var(--ink-1000); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not(.light) .ib-step-node { color: var(--ink-1000); } }
+.ib-step-node svg { width: 16px; height: 16px; stroke-width: 2; }
+.ib-step:not(:last-child)::before { content: ""; position: absolute; left: 15.5px; top: 36px; bottom: -4px; width: 1px; background: var(--border-strong); }
+.ib-latency { height: 6px; border-radius: 3px; background: var(--surface-sunken); position: relative; overflow: hidden; }
+.ib-latency > span { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+
+/* ---------- decisions ---------- */
+.ib-decision { display: inline-flex; align-items: center; gap: 5px; font: 600 10.5px/1 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; }
+.ib-decision--deny  { color: var(--guard-blocked); background: var(--guard-blocked-bg); }
+.ib-decision--allow { color: var(--guard-safe); background: var(--guard-safe-bg); }
+.ib-decision--info  { color: var(--text-secondary); background: var(--surface-sunken); }
+.ib-decision--wait  { color: var(--action-pending); background: var(--action-pending-bg); }
+
+/* ---------- toggle ---------- */
+.ib-toggle { position: relative; width: 32px; height: 18px; border-radius: 99px; background: var(--border-strong); flex: none; transition: background var(--duration-base) var(--ease-standard); }
+.ib-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 99px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform var(--duration-base) var(--ease-emphasized); }
+.ib-toggle[aria-checked="true"] { background: var(--accent); }
+.ib-toggle[aria-checked="true"]::after { transform: translateX(14px); }
+.ib-toggle[aria-disabled="true"] { opacity: .8; }
+
+/* ---------- segmented ---------- */
+.ib-seg { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 3px; gap: 2px; border-radius: var(--radius-lg); background: var(--surface-sunken); border: 1px solid var(--border); }
+.ib-seg > button { height: 30px; padding: 0 14px; border-radius: 9px; font: 500 var(--text-sm)/1 var(--font-sans); color: var(--text-secondary); }
+.ib-seg > button[aria-pressed="true"] { background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* ---------- avatars ---------- */
+.ib-avatar { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 99px; font: 600 11px/1 var(--font-sans); color: #fff; flex: none; letter-spacing: .01em; }
+
+/* ---------- loading / streaming ---------- */
+.ib-skeleton { background: linear-gradient(90deg, var(--surface-sunken) 0%, var(--border-subtle) 50%, var(--surface-sunken) 100%); background-size: 200% 100%; animation: ib-shimmer 1.4s linear infinite; border-radius: 4px; }
+.ib-caret::after { content: ""; display: inline-block; width: 7px; height: 1.05em; margin-left: 2px; vertical-align: -2px; background: var(--model-reason); border-radius: 1px; animation: ib-blink 1s steps(2) infinite; }
+.ib-live-dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; animation: ib-pulse 1.4s ease-in-out infinite; }
+.ib-scanline { position: absolute; left: 0; right: 0; height: 64px; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--guard-safe-solid) 18%, transparent), transparent); border-bottom: 1px solid var(--guard-safe-solid); animation: ib-scan var(--duration-scan) var(--ease-standard) infinite; pointer-events: none; }
+
+@keyframes ib-shimmer { to { background-position: -200% 0; } }
+@keyframes ib-blink { to { visibility: hidden; } }
+@keyframes ib-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes ib-scan { from { top: -64px; } to { top: 100%; } }
+@keyframes ib-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ib-enter { animation: ib-in var(--duration-slow) var(--ease-standard) both; }
+
+/* ---------- nav items ---------- */
+.ib-nav { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: var(--radius-md); border: 1px solid transparent; color: var(--text-secondary); font: 500 var(--text-sm)/1 var(--font-sans); }
+.ib-nav:hover { background: var(--surface-hover); color: var(--text); }
+.ib-nav[aria-current="page"] { background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-xs); border: 1px solid var(--border); }
+.ib-nav .ib-count { margin-left: auto; font: 500 11px/1 var(--font-mono); color: var(--text-tertiary); }
+
+/* ---------- example-data marker (remove in production) ---------- */
+.ib-example { display: inline-flex; align-items: center; gap: 5px; font: 500 10px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary);
+  border: 1px dashed var(--border-strong); border-radius: 4px; padding: 4px 6px; }
+
+/* scrollbars */
+.ib-scroll { overflow: auto; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+/* ---------- theme toggle (v1.1) ----------
+   <button class="ib-theme-toggle" onclick="ibToggleTheme()" aria-label="Switch light/dark">
+     <i data-lucide="moon" class="ib-theme-moon"></i><i data-lucide="sun" class="ib-theme-sun"></i></button>
+   Follows the OS until clicked; the choice is saved in localStorage('ib-theme'). */
+.ib-theme-toggle { display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+.ib-theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
+.ib-theme-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.ib-theme-toggle svg { width: 16px; height: 16px; }
+.ib-theme-toggle .ib-theme-sun { display: none; }
+.dark .ib-theme-toggle .ib-theme-sun, [data-theme="dark"] .ib-theme-toggle .ib-theme-sun { display: block; }
+.dark .ib-theme-toggle .ib-theme-moon, [data-theme="dark"] .ib-theme-toggle .ib-theme-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .ib-theme-toggle .ib-theme-sun { display: block; }
+  :root:not([data-theme="light"]):not(.light) .ib-theme-toggle .ib-theme-moon { display: none; }
+}
