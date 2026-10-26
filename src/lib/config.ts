@@ -7,7 +7,7 @@
  * public catalog. NEBIUS_SAFETY_MODEL is the slot for one when it is listed.
  */
 
-export const PIPELINE_VERSION = "2026-10-25.4";
+export const PIPELINE_VERSION = "2026-10-26.1";
 
 export const DEFAULT_BASE_URL = "https://api.tokenfactory.nebius.com/v1";
 
@@ -153,6 +153,16 @@ export function liveReady(): boolean {
 
 export function inboxSource(): "fixtures" | "imap" {
   return process.env.INBOX_SOURCE?.trim().toLowerCase() === "imap" ? "imap" : "fixtures";
+}
+
+/** Real mail stays off the public demo. All four have to be set. */
+export function imapFeatureEnabled(): boolean {
+  return (
+    process.env.PUBLIC_DEMO === "false" &&
+    Boolean(process.env.ADMIN_SECRET?.trim()) &&
+    inboxSource() === "imap" &&
+    Boolean(process.env.IMAP_HOST?.trim() && process.env.IMAP_USER?.trim() && process.env.IMAP_PASSWORD)
+  );
 }
 
 export function appMeta() {

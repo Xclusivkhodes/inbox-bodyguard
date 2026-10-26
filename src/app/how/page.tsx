@@ -22,7 +22,7 @@ const steps = [
   },
   {
     title: "A second gate, then you",
-    body: "Before any tool runs, the guard reads the action again. External mail waits for approval. Approving records the decision on this machine. Inbox Bodyguard does not send mail.",
+    body: "Before any tool runs, the guard reads the action again. A masked check then drops memory writes and exfiltration that the letter added. Send and forward to an allowed person still wait for approval. Approving records the decision on this machine. Inbox Bodyguard does not send mail. A demo trace says no model call was made.",
   },
 ];
 

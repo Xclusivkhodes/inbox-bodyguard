@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Mark } from "@/components/mark";
+import { Lockup } from "@/components/mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const links = [
@@ -18,9 +18,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-2 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-2">
-          <Mark size={28} />
-          <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">Inbox Bodyguard</span>
+        <Link href="/" className="flex min-w-0 items-center" aria-label="Inbox Bodyguard">
+          <Lockup height={26} />
+          <span className="sr-only">Inbox Bodyguard</span>
         </Link>
         <nav className="ml-6 hidden items-center gap-1 text-[13px] text-[var(--text-secondary)] md:flex" aria-label="Primary">
           {links.map((link) => (

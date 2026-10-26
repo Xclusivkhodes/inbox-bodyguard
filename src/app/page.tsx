@@ -51,9 +51,12 @@ export default function HomePage() {
         <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 lg:grid-cols-4">
           {lanes.map((item) => (
             <div key={item.title} className="flex items-start gap-3 bg-[var(--surface)] p-4">
-              <span className={`ib-model-glyph ib-lane--${item.lane} h-8 w-8 rounded-md`}>
-                <item.icon className="h-4 w-4" aria-hidden="true" />
-              </span>
+              <span
+                className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: item.lane === "guard" ? "var(--model-guard)" : "var(--text-tertiary)" }}
+                aria-hidden="true"
+              />
+              <item.icon className="ib-icon text-[var(--text-secondary)]" aria-hidden="true" />
               <div>
                 <h3 className="text-[14px] font-medium">{item.title}</h3>
                 <p className="mt-1 text-[12px] leading-5 text-[var(--text-tertiary)]">{item.detail}</p>

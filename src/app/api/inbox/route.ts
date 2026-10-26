@@ -1,25 +1,29 @@
 import { connection } from "next/server";
-import { NextResponse } from "next/server";
 
-import { jsonError } from "@/lib/http";
+import { fail, reply } from "@/lib/http";
 import { assertIpLimit, clientIp } from "@/lib/limits";
+import { sessionIdFromRequest } from "@/lib/session";
 import { getInbox } from "@/lib/store";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const started = Date.now();
+  const route = "GET /api/inbox";
   await connection();
   try {
-    return NextResponse.json(await getInbox());
+    return reply(request, route, started, await getInbox(sessionIdFromRequest(request)));
   } catch (error) {
-    return jsonError(error);
+    return fail(request, route, started, error);
   }
 }
 
 export async function POST(request: Request) {
+  const started = Date.now();
+  const route = "POST /api/inbox";
   await connection();
   try {
     assertIpLimit(clientIp(request));
-    return NextResponse.json(await getInbox());
+    return reply(request, route, started, await getInbox(sessionIdFromRequest(request)));
   } catch (error) {
-    return jsonError(error);
+    return fail(request, route, started, error);
   }
 }

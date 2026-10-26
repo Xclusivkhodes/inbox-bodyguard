@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Alex Rivera's sample inbox. The guard blocks hidden instructions before a draft is offered.",
 };
 
-export default function InboxPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
+export default function InboxPage({ searchParams }: { searchParams: Promise<{ filter?: string; letter?: string }> }) {
   return (
     <Suspense fallback={<div className="ib-skeleton m-4 h-24" />}>
       <InboxLoader searchParams={searchParams} />
@@ -15,7 +15,7 @@ export default function InboxPage({ searchParams }: { searchParams: Promise<{ fi
   );
 }
 
-async function InboxLoader({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
-  const { filter } = await searchParams;
-  return <InboxClient filter={filter} />;
+async function InboxLoader({ searchParams }: { searchParams: Promise<{ filter?: string; letter?: string }> }) {
+  const { filter, letter } = await searchParams;
+  return <InboxClient filter={filter} letter={letter} />;
 }

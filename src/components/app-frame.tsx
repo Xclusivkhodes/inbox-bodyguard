@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Mark } from "@/components/mark";
+import { Lockup } from "@/components/mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { apiUrl } from "@/lib/api";
 import type { AppMeta, EmailView } from "@/lib/types";
@@ -160,9 +160,8 @@ export function AppFrame({ children, initial }: { children: React.ReactNode; ini
     <AppContext.Provider value={value}>
       <div className="ib-shell" data-reading={reading ? "true" : "false"}>
         <aside className="ib-sidebar" data-open={menu ? "true" : "false"}>
-          <div className="flex h-[52px] items-center gap-2.5 px-4">
-            <Mark size={24} />
-            <span className="text-[14px] font-semibold tracking-[-0.01em]">Inbox Bodyguard</span>
+          <div className="flex h-12 items-center gap-2 px-3">
+            <Lockup height={22} />
             <button type="button" className="ib-btn ib-btn-ghost ib-btn-sm ml-auto lg:hidden" onClick={() => setMenu(false)} aria-label="Close menu">
               <X className="ib-icon" />
             </button>

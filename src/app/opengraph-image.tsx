@@ -14,7 +14,7 @@ export default function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#111113",
+          background: "#0A0A0B",
           color: "#fafafa",
           padding: "72px",
         }}
@@ -25,7 +25,7 @@ export default function OpenGraphImage() {
         <div style={{ display: "flex", fontSize: 64, lineHeight: 1.05, letterSpacing: -1, maxWidth: 920 }}>
           The AI email assistant that cannot be turned against you.
         </div>
-        <div style={{ display: "flex", fontSize: 24, color: "#3ec19e" }}>
+        <div style={{ display: "flex", fontSize: 24, color: "#D08BE3" }}>
           Guard on the way in. Guard again before any tool.
         </div>
       </div>

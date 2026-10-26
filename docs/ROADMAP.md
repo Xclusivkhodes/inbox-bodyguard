@@ -26,16 +26,20 @@ The brief asks for 50–100 cases sampled from LLMail-Inject and AgentDojo. That
 
 ## 5. A real mailbox, still read-only
 
-IMAP sync already refuses to run without `INBOX_SOURCE=imap` and `x-admin-secret`. A next step is a documented read-only connect for one mailbox the user owns. Do not add SMTP. Do not auto-send. Approval stays a local decision until a transport exists, and even then send stays behind an explicit second confirmation.
+IMAP sync stays off unless `PUBLIC_DEMO=false`, an admin secret, `INBOX_SOURCE=imap`, and IMAP credentials are all set. The route returns 202 and a job id. A next step is a documented read-only connect for one mailbox the user owns. Do not add SMTP. Do not auto-send. Approval stays a local decision until a transport exists, and even then send stays behind an explicit second confirmation.
 
 ## 6. Smaller product gaps
 
-- Show an estimated cost on a live trace, from the same rate table as the ledger. Demo traces should keep saying no call was made.
-- Let a preference row open the editor for that key. Leave contacts as a directory unless the user adds a person themselves.
-- A masked re-execution check (the MELON idea in the brief) is research, not a demo requirement. If you add it, it has to fail closed and stay inside the budget caps.
+Done in the demo build:
+
+- A live trace shows an estimated cost from the same rate table as the ledger. Demo traces say no call was made. Cache hits are not charged again.
+- A preference row opens the editor for that key. A person added from the memory screen joins the directory. Seeded addresses are not rewritten. Letters cannot write either store.
+- Masked re-execution is deterministic and local. It withholds memory writes and exfiltration, leaves send and forward for approval, and fails closed. It does not spend a second model call. A live Nemotron task-alignment pass still waits on a budget OK.
 
 ## 7. Housekeeping
 
-- Next.js warns that `middleware` should move to `proxy`. Cosmetic. Do it when touching that file.
+- `middleware` now lives in `src/proxy.ts`. The named export is `proxy`. It mints `ib-session` and echoes `x-request-id`.
+- GitHub Actions runs the offline checks. Protecting `main` so that check is required is a repository setting. A read-only token cannot turn it on.
+- Load numbers from the demo server are in [perf.md](perf.md).
 - `tailwind.config.js` at the repo root is the designer's v3 reference. The app does not load it. Do not "fix" dark mode there.
 - Dev HMR from `127.0.0.1` needs `allowedDevOrigins`. Production does not use HMR. If buttons die in `next dev`, check that before changing React.
