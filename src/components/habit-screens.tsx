@@ -29,7 +29,7 @@ export function BriefScreen() {
                 <li key={item.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <p className="text-[14px] font-medium">{item.who} has been waiting {item.days} days</p>
                   <p className="mt-1 text-[13px] text-[var(--text-secondary)]">{item.subject}</p>
-                  <Link href="/inbox" className="mt-2 inline-flex text-[13px] font-medium text-[var(--text-link)]">Open the letter</Link>
+                  <Link href={`/inbox?letter=${item.id}`} className="mt-2 inline-flex text-[13px] font-medium text-[var(--text-link)]">Open the letter</Link>
                 </li>
               ))
             )}
@@ -100,25 +100,27 @@ export function QueueScreen() {
         {error ? <p className="ib-banner mt-4 px-4 py-3 text-[13px]" role="alert">{error}</p> : null}
         <ul className="mt-6 flex flex-col gap-3">
           {pending.length === 0 ? (
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-[14px] text-[var(--text-secondary)]">
-              The queue is empty. Reset the sample inbox if you want the PO reply back.
+            <li className="text-[14px] text-[var(--text-secondary)]">
+              Nothing waiting for you. Sends, forwards and deletes will appear here first.
             </li>
           ) : (
             pending.map(({ email, action }) => (
-              <li key={action.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="ib-action ib-action--pending">{action.type}</span>
-                  <h2 className="text-[15px] font-semibold">{action.title}</h2>
+              <li key={action.id} className="ib-action ib-action--pending">
+                <div className="ib-action-head">
+                  <span className="ib-tag ib-tag--pending"><span className="dot" aria-hidden="true" />{action.type}</span>
+                  <h2 className="text-[13px] font-medium">{action.title}</h2>
                 </div>
-                <p className="mt-2 text-[13px] text-[var(--text-secondary)]">{email.subject}</p>
-                <p className="mt-1 text-[13px] leading-5 text-[var(--text-secondary)]">{action.detail}</p>
-                {action.to ? <p className="ib-mono mt-2 text-[12px] text-[var(--text-tertiary)]">{action.to}</p> : null}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" className="ib-btn ib-btn-approve" onClick={() => decide(email.id, action.id, "approved")}>
+                <div className="ib-action-body">
+                  <p>{email.subject}</p>
+                  <p className="mt-1">{action.detail}</p>
+                  {action.to ? <p className="ib-mono mt-2">{action.to}</p> : null}
+                </div>
+                <div className="ib-action-foot">
+                  <button type="button" className="ib-btn ib-btn-primary" onClick={() => decide(email.id, action.id, "approved")}>
                     Approve
                   </button>
                   <button type="button" className="ib-btn ib-btn-ghost" onClick={() => decide(email.id, action.id, "denied")}>
-                    Decline
+                    Discard
                   </button>
                 </div>
               </li>

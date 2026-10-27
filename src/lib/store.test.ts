@@ -45,4 +45,22 @@ describe("memory", () => {
     assert.equal(again?.decisions.length, 0);
     assert.ok((await store.getInbox()).emails.length >= 10);
   });
+
+  it("adds a contact the user wrote and keeps it across reset", async () => {
+    const store = await import("./store");
+    await store.addContact({ name: "Nia Mensah", email: "Nia@Harborlight.co", organization: "Harborlight" });
+    let memory = await store.getMemory();
+    const added = memory.contacts.find((contact) => contact.email === "nia@harborlight.co");
+    assert.equal(added?.source, "you");
+    assert.match(added?.notes ?? "", /You added this/);
+    await assert.rejects(() => store.addContact({ name: "Priya Shah", email: "priya@northline.io" }), /directory/);
+    const letter = await store.getEmail("po-1842");
+    assert.equal(letter?.assessment.cost.usd, 0);
+    assert.match(letter?.assessment.cost.note ?? "", /No Token Factory call was made/);
+    assert.ok(letter?.assessment.trace.some((step) => step.stage === "Masked re-execution"));
+    await store.resetDemo();
+    memory = await store.getMemory();
+    assert.equal(memory.contacts.find((contact) => contact.email === "nia@harborlight.co")?.source, "you");
+    assert.equal(memory.preferences.find((item) => item.key === "tone")?.value, "Shorter, still British spelling.");
+  });
 });

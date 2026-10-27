@@ -1,30 +1,47 @@
 import { connection } from "next/server";
-import { NextResponse } from "next/server";
 
-import { PASTE_CAP } from "@/lib/config";
-import { jsonError } from "@/lib/http";
+import { fail, readJson, reply } from "@/lib/http";
 import { assertIpLimit, clientIp } from "@/lib/limits";
-import { getMemory, HttpError, setPreference } from "@/lib/store";
+import { memoryBody } from "@/lib/request-schema";
+import { sessionIdFromRequest } from "@/lib/session";
+import { addContact, getMemory, HttpError, setPreference } from "@/lib/store";
 
-export async function GET() {
+const MEMORY_BODY_CAP = 16 * 1024;
+
+export async function GET(request: Request) {
+  const started = Date.now();
+  const route = "GET /api/memory";
   await connection();
   try {
-    return NextResponse.json(await getMemory());
+    return reply(request, route, started, await getMemory(sessionIdFromRequest(request)));
   } catch (error) {
-    return jsonError(error);
+    return fail(request, route, started, error);
   }
 }
 
 export async function POST(request: Request) {
+  const started = Date.now();
+  const route = "POST /api/memory";
   await connection();
   try {
     assertIpLimit(clientIp(request));
-    const body = (await request.json()) as { key?: string; value?: string };
-    if (!body.key || !body.value) throw new HttpError("A preference needs a name and a value.", 400);
-    if (body.value.length > PASTE_CAP) throw new HttpError("That preference is too long.", 400);
-    await setPreference(body.key, body.value);
-    return NextResponse.json(await getMemory());
+    const body = await readJson(request, memoryBody, MEMORY_BODY_CAP);
+    const sessionId = sessionIdFromRequest(request);
+    if (body.contact) {
+      await addContact(
+        {
+          name: body.contact.name,
+          email: body.contact.email,
+          organization: body.contact.organization ?? "",
+        },
+        sessionId,
+      );
+      return reply(request, route, started, await getMemory(sessionId));
+    }
+    if (!body.key || !body.value) throw new HttpError("A preference needs a name and a value.", 400, "BAD_INPUT");
+    await setPreference(body.key, body.value, sessionId);
+    return reply(request, route, started, await getMemory(sessionId));
   } catch (error) {
-    return jsonError(error);
+    return fail(request, route, started, error);
   }
 }

@@ -46,6 +46,7 @@ export function EvidenceScreen() {
             <Row label="Tools" value="local/approval-gate" />
             <Row label="Not called" value={data.meta.models.excluded || "Ultra"} />
           </dl>
+          <p className="mt-4 text-[12px] leading-5 text-[var(--text-secondary)]">{email.assessment.cost?.note ?? "No Token Factory call was made."}</p>
           <p className="mt-4 text-[12px] leading-5 text-[var(--text-tertiary)]">{data.meta.safetyModelNote}</p>
         </aside>
       </div>

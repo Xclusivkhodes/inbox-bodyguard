@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
 
 import { EMAIL_BODY_CAP, HARD_TOKEN_CEILING, maxTokens, PIPELINE_VERSION } from "./config";
+import { getDb } from "./db";
 
 export type CacheEntry = {
   content: string;
@@ -14,8 +13,6 @@ export type CacheEntry = {
   prewarmed?: boolean;
 };
 
-type CacheFile = Record<string, CacheEntry>;
-
 export type ChatParts = {
   model: string;
   system: string;
@@ -24,17 +21,29 @@ export type ChatParts = {
   maxTokens: number;
 };
 
-function cachePath(): string {
-  return process.env.BODYGUARD_CACHE_PATH || path.join(process.cwd(), "data", "llm-cache.json");
-}
+const CACHE_CAP = 400;
 
-function readCache(): CacheFile {
-  try {
-    const parsed = JSON.parse(readFileSync(/*turbopackIgnore: true*/ cachePath(), "utf8")) as CacheFile;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
+type CacheRow = {
+  content?: string;
+  model?: string;
+  prompt_tokens?: number | null;
+  completion_tokens?: number | null;
+  from_reasoning?: number;
+  created_at?: string;
+  prewarmed?: number;
+};
+
+function rowToEntry(row: CacheRow): CacheEntry | null {
+  if (!row.content) return null;
+  return {
+    content: row.content,
+    model: row.model || "",
+    promptTokens: row.prompt_tokens ?? undefined,
+    completionTokens: row.completion_tokens ?? undefined,
+    fromReasoning: row.from_reasoning === 1,
+    createdAt: row.created_at || new Date().toISOString(),
+    prewarmed: row.prewarmed === 1,
+  };
 }
 
 export function completionCap(requested?: number): number {
@@ -59,17 +68,58 @@ export function chatCacheKey(parts: ChatParts): string {
 }
 
 export function readCached(key: string): CacheEntry | null {
-  const entry = readCache()[key];
-  if (!entry?.content) return null;
+  const row = getDb().prepare(
+    `SELECT content, model, prompt_tokens, completion_tokens, from_reasoning, created_at, prewarmed
+     FROM llm_cache WHERE key = ?`,
+  ).get(key) as CacheRow | undefined;
+  const entry = row ? rowToEntry(row) : null;
+  if (!entry) return null;
+  getDb().prepare("UPDATE llm_cache SET last_used = ? WHERE key = ?").run(new Date().toISOString(), key);
   return entry;
 }
 
+function pruneCache(): void {
+  const count = getDb().prepare("SELECT COUNT(*) AS n FROM llm_cache").get() as { n?: number } | undefined;
+  const extra = Number(count?.n ?? 0) - CACHE_CAP;
+  if (extra <= 0) return;
+  getDb()
+    .prepare(
+      `DELETE FROM llm_cache WHERE key IN (
+         SELECT key FROM llm_cache ORDER BY prewarmed ASC, last_used ASC LIMIT ?
+       )`,
+    )
+    .run(extra);
+}
+
+/** SQLite replaces the JSON file. A transaction plus WAL is crash-safe, unlike a full-file rewrite. */
 export function writeCached(key: string, entry: CacheEntry): void {
-  const file = cachePath();
-  mkdirSync(path.dirname(file), { recursive: true });
-  const current = readCache();
-  current[key] = entry;
-  writeFileSync(/*turbopackIgnore: true*/ file, `${JSON.stringify(current)}\n`);
+  const db = getDb();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO llm_cache (key, content, model, prompt_tokens, completion_tokens, from_reasoning, created_at, prewarmed, last_used)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET
+       content = excluded.content,
+       model = excluded.model,
+       prompt_tokens = excluded.prompt_tokens,
+       completion_tokens = excluded.completion_tokens,
+       from_reasoning = excluded.from_reasoning,
+       created_at = excluded.created_at,
+       prewarmed = excluded.prewarmed,
+       last_used = excluded.last_used
+     WHERE llm_cache.prewarmed = 1 OR excluded.prewarmed = 0`,
+  ).run(
+    key,
+    entry.content,
+    entry.model,
+    entry.promptTokens ?? null,
+    entry.completionTokens ?? null,
+    entry.fromReasoning ? 1 : 0,
+    entry.createdAt || now,
+    entry.prewarmed ? 1 : 0,
+    now,
+  );
+  pruneCache();
 }
 
 /** Demo seeds. A real Token Factory response is never overwritten. */

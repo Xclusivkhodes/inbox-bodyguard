@@ -18,7 +18,7 @@ const points = [
   },
   {
     title: "Spend has a brake",
-    body: "Each live response records prompt and completion tokens. Past 70% of the budget, only Nemotron Nano runs. Past 90%, or when LLM_ENABLED is off, calls stop and the cache or demo is served.",
+    body: "Each live response records prompt and completion tokens, and the letter shows an estimate from the same rate table as the ledger. A demo trace says no call was made. Past 70% of the budget, only Nemotron Nano runs. Past 90%, or when LLM_ENABLED is off, calls stop and the cache or demo is served.",
   },
   {
     title: "Nothing is sent",
@@ -26,7 +26,7 @@ const points = [
   },
   {
     title: "Defence in depth",
-    body: "Hidden text is removed, the letter is marked as data, Nemotron judges it, a reader and a planner stay apart, then a policy check and an exfiltration filter run before any tool. One classifier is not the product. Nebius Token Factory has no dedicated guard model, so Nemotron Nano is the safety judge.",
+    body: "Hidden text is removed, the letter is marked as data, Nemotron judges it, a reader and a planner stay apart, then a policy check, an exfiltration filter, and a masked re-execution run before any tool. One classifier is not the product. Nebius Token Factory has no dedicated guard model, so Nemotron Nano is the safety judge. The masked check in this demo does not make a second model call.",
   },
   {
     title: "Known limits",

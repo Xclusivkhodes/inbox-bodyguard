@@ -21,11 +21,12 @@ export function GuardScreen() {
         <div className="ib-eyebrow">Guard result</div>
         <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.02em]">{email.subject}</h1>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className={`ib-guard ib-guard--${kind}`}>{verdictLabel(guard.verdict)}</span>
+          <span className={`ib-tag ib-tag--${kind}`}><span className="dot" aria-hidden="true" />{verdictLabel(guard.verdict)}</span>
           <span className="ib-model ib-model--guard"><b>Guard</b><span className="ib-model-meta">{data.meta.models.classifier}</span></span>
           <span className="ib-model ib-model--tool"><b>Output gate</b><span className="ib-model-meta">{email.assessment.guardDown ? "fail closed" : "local rules"}</span></span>
         </div>
         <p className="mt-4 text-[15px] leading-6 text-[var(--text-secondary)]">{guard.explanation}</p>
+        <p className="mt-3 text-[13px] text-[var(--text-secondary)]">{email.assessment.cost?.note ?? "No Token Factory call was made."}</p>
         <section className="mt-8">
           <h2 className="text-[14px] font-semibold">Why</h2>
           <ul className="mt-3 flex flex-col gap-3">

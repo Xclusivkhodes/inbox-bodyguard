@@ -38,6 +38,10 @@ A simplified CaMeL split: the reader returns typed fields and cannot start a too
 
 Quarantine already drops the attacker's goal, so the tool-gate column matches the guard on this suite. The README says that on purpose. Withheld actions are not approvable. Send and forward to an allowed recipient stay pending. Delete needs approval even on a quarantined letter because it is a local record, not a send.
 
+## Letter cost and masked re-execution
+
+Demo assessments carry a cost of zero and the sentence "No Token Factory call was made." A live assessment sums `estimateUsd` over the calls that were not cache hits, using the same 25 Oct 2026 rates as the ledger. The masked check is local: memory writes and exfiltration are withheld, send and forward to an allowed person stay in the queue, and a thrown check withholds every action. It is not a second Nemotron call. `src/proxy.ts` replaced `middleware.ts`.
+
 ## Exfiltration is deterministic
 
 Markdown images, links that were not in the source, and query strings are stripped in code. That covers the EchoLeak shape without a model call. The output judge still runs.
@@ -52,13 +56,13 @@ Approval records a decision in SQLite and the API returns "No mail was transmitt
 
 ## Cache, caps, and rates
 
-Content-hash cache, no expiry for demo verdicts, pre-warm of the demo prompts. Role caps are tighter than the 1024 ceiling. One request, 8 second timeout, no retry on HTTP 400. Per-IP and global limits return 429. The client address is the socket address unless `TRUST_PROXY=1`.
+Content-hash cache in SQLite (`llm_cache`, WAL, LRU about 400, prewarm cannot overwrite a real response). No expiry for demo verdicts. Role caps are tighter than the 1024 ceiling. Per-call timeout is 8 seconds, 15 for Super. A letter has one 22 second deadline. Transport errors retry once. HTTP 400 is not retried, except one drop of `response_format`. An empty completion is not retried. Completions are checked with zod before they are cached. A billable 200 is still recorded if the body fails that check. Per-IP and global limits return 429. With `TRUST_PROXY=1` the client address is the right-most forwarding hop, and only when it looks like an IP. The address map is capped.
 
 Super reasoning: if `content` is null and `reasoning_content` holds JSON, use that JSON once. If there is reasoning and no JSON, throw. Do not call again. Super and Ultra requests send `chat_template_kwargs.enable_thinking` false in that same request.
 
 ## Design v1.1
 
-Backgrounds are white (`#FFFFFF`) and near-black (`#111113`). Jade, rose, amber, iris, and sky are accents. The temporary neutral override file was removed and must stay removed. Theme follows `prefers-color-scheme` until `localStorage` key `ib-theme` is `light` or `dark`. The blocking script in `src/app/layout.tsx` matches the designer snippet. Tailwind v4 dark mode is a custom variant in `src/app/globals.css`, not the v3 config file.
+Backgrounds are white (`#FFFFFF`) and `#0A0A0B`. The accent is plum (`#862F9B` light, `#D08BE3` dark). Safe, blocked, and flagged stay status colours. Model tags are neutral except the guard lane. Instrument Serif is only `.ib-display` on marketing pages. Theme follows `prefers-color-scheme` until `localStorage` key `ib-theme` is `light` or `dark`. The blocking script in `src/app/layout.tsx` matches the designer snippet. Tailwind v4 dark mode is a custom variant in `src/app/globals.css`, not the v3 config file. The files under `docs/design/` are the earlier jade reference. The live tokens are `src/styles/tokens.css`.
 
 `cacheComponents` and `partialPrefetching` were turned off. They left the page in a postponed shell, so client components rendered and never hydrated.
 
@@ -70,4 +74,4 @@ The scored set is fixture-authored: 11 text attacks, 8 benign, 1 image case outs
 
 ## Hosting
 
-`Dockerfile` runs `npm ci`, `next build`, and `npm start` on `PORT` (default 4721) with demo mode on and the LLM kill switch off. `render.yaml` attaches a 1 GB disk at `/data`. `vercel.json` is the frontend preset. `.dockerignore` keeps `node_modules`, `.next`, the database, and the local uploads out of the image.
+`Dockerfile` is a multi-stage standalone image. It runs as user `nextjs` and health-checks `GET /api/healthz`. `render.yaml` is the free plan with no disk, `TRUST_PROXY=1`, and demo mode on. Spend across restarts needs Upstash or Turso. `vercel.json` is the frontend preset. `.dockerignore` keeps `node_modules`, `.next`, the database, and the local uploads out of the image. Approvals, reset, and memory edits are scoped by an HMAC `ib-session` cookie so one public demo does not share a single decision log.

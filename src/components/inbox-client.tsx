@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Brain, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, ShieldX, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/app-frame";
@@ -8,7 +8,7 @@ import { apiUrl } from "@/lib/api";
 import { formatWhen, previewText, verdictLabel } from "@/lib/format";
 import type { EmailView, ProposedAction, TraceStep } from "@/lib/types";
 
-export function InboxClient({ filter }: { filter?: string }) {
+export function InboxClient({ filter, letter }: { filter?: string; letter?: string }) {
   const { data, setReading, reload } = useApp();
   const emails = data?.emails;
   const visible = useMemo(() => {
@@ -23,7 +23,16 @@ export function InboxClient({ filter }: { filter?: string }) {
     return list;
   }, [emails, filter]);
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState("inv-1842-poison");
+  const [pickedId, setPickedId] = useState<string | null>(letter ?? null);
+  const [seenLetter, setSeenLetter] = useState(letter);
+  const [dismissedLetter, setDismissedLetter] = useState<string | null>(null);
+  if (letter !== seenLetter) {
+    setSeenLetter(letter);
+    setPickedId(letter ?? null);
+    setDismissedLetter(null);
+  }
+  const selectedId = pickedId ?? letter ?? "inv-1842-poison";
+  const linked = Boolean(letter) && dismissedLetter !== letter;
   const queried = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return visible;
@@ -36,7 +45,7 @@ export function InboxClient({ filter }: { filter?: string }) {
   if (!data) return null;
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="ib-pane flex min-h-0 flex-1" data-reading={linked ? "true" : "false"}>
       <section className="ib-list">
         <div className="flex h-[52px] items-center justify-between gap-2 px-4">
           <div className="min-w-0">
@@ -50,7 +59,8 @@ export function InboxClient({ filter }: { filter?: string }) {
               const response = await fetch(apiUrl("/api/inbox/reset"), { method: "POST" });
               if (!response.ok) return;
               setQuery("");
-              setSelectedId("inv-1842-poison");
+              setPickedId("inv-1842-poison");
+              setDismissedLetter(letter ?? null);
               reload();
             }}
           >
@@ -85,7 +95,7 @@ export function InboxClient({ filter }: { filter?: string }) {
                   className="ib-btn ib-btn-primary"
                   onClick={() => {
                     setQuery("");
-                    setSelectedId("inv-1842-poison");
+                    setPickedId("inv-1842-poison");
                     setReading(true);
                   }}
                 >
@@ -101,7 +111,7 @@ export function InboxClient({ filter }: { filter?: string }) {
                 className="ib-row"
                 aria-current={selected?.id === email.id ? "true" : undefined}
                 onClick={() => {
-                  setSelectedId(email.id);
+                  setPickedId(email.id);
                   setReading(true);
                 }}
               >
@@ -119,7 +129,7 @@ export function InboxClient({ filter }: { filter?: string }) {
           )}
         </div>
       </section>
-      {selected ? <Reading key={selected.id} email={selected} onChanged={reload} /> : <EmptyRead hasMail={(emails?.length ?? 0) > 0} onShow={() => { setQuery(""); setSelectedId("inv-1842-poison"); setReading(true); }} />}
+      {selected ? <Reading key={selected.id} email={selected} linked={linked} onBack={() => setDismissedLetter(letter ?? null)} onChanged={reload} /> : <EmptyRead hasMail={(emails?.length ?? 0) > 0} onShow={() => { setQuery(""); setPickedId("inv-1842-poison"); setReading(true); }} />}
     </div>
   );
 }
@@ -128,9 +138,9 @@ function EmptyRead({ hasMail, onShow }: { hasMail: boolean; onShow: () => void }
   return (
     <div className="ib-read items-center justify-center p-8 text-center">
       <div className="max-w-sm">
-        <h2 className="text-[16px] font-semibold">{hasMail ? "Select a letter" : "The sample inbox is empty"}</h2>
-        <p className="mt-2 text-[13px] leading-5 text-[var(--text-secondary)]">
-          {hasMail ? "The guard result, the draft, and any withheld tool call open here." : "Reset restores the demo letters. Nothing was sent."}
+        <h2 className="text-[16px] font-semibold">{hasMail ? "Select a letter." : "The sample inbox is empty."}</h2>
+        <p className="mt-2 text-[13px] leading-5 text-[var(--text-tertiary)]">
+          {hasMail ? "↑ ↓ to move, Enter to open." : "Reset the demo to load Alex's letters."}
         </p>
         <button type="button" className="ib-btn ib-btn-secondary mt-4" onClick={onShow}>Show the test attack</button>
       </div>
@@ -138,7 +148,17 @@ function EmptyRead({ hasMail, onShow }: { hasMail: boolean; onShow: () => void }
   );
 }
 
-function Reading({ email, onChanged }: { email: EmailView; onChanged: () => void }) {
+function Reading({
+  email,
+  linked,
+  onBack,
+  onChanged,
+}: {
+  email: EmailView;
+  linked: boolean;
+  onBack: () => void;
+  onChanged: () => void;
+}) {
   const { setReading } = useApp();
   const [assist, setAssist] = useState(false);
   const [steps, setSteps] = useState<TraceStep[]>([]);
@@ -204,11 +224,19 @@ function Reading({ email, onChanged }: { email: EmailView; onChanged: () => void
     <>
       <article className="ib-read">
         <header className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
-          <button type="button" className="ib-btn ib-btn-ghost ib-btn-sm ib-back" onClick={() => setReading(false)} aria-label="Back to the list">
+          <button
+            type="button"
+            className="ib-btn ib-btn-ghost ib-btn-sm ib-back"
+            onClick={() => {
+              setReading(false);
+              if (linked) onBack();
+            }}
+            aria-label="Back to the list"
+          >
             <ArrowLeft className="ib-icon" />
           </button>
           <div className="min-w-0">
-            <h1 className="truncate text-[16px] font-semibold">{email.subject}</h1>
+            <h1 className="ib-h1 truncate">{email.subject}</h1>
             <p className="truncate text-[12px] text-[var(--text-tertiary)]">
               {email.fromName} &lt;{email.fromEmail}&gt; · {formatWhen(email.receivedAt)}
             </p>
@@ -221,35 +249,32 @@ function Reading({ email, onChanged }: { email: EmailView; onChanged: () => void
         </header>
         <div className="ib-scroll flex-1 px-5 py-5">
           {guard.verdict === "quarantine" ? (
-            <div className="ib-banner mb-4 px-4 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="ib-guard ib-guard--blocked">Blocked</span>
-                <span className="text-[14px] font-semibold">Blocked before any action ran</span>
-              </div>
-              <p className="mt-1 text-[13px] leading-5 text-[var(--text-secondary)]">{guard.explanation}</p>
-              {guard.findings.some((finding) =>
-                ["hidden_text", "html_comment", "invisible_chars", "encoded_payload"].includes(finding.category),
-              ) ? (
-                <p className="mt-2 text-[13px] font-medium">We removed hidden instructions.</p>
-              ) : null}
-              {guard.findings.some((finding) => finding.category === "spoofed_sender" || finding.category === "baseline_shift") ? (
-                <p className="mt-2 text-[13px] font-medium">Not their usual address or usual request.</p>
-              ) : null}
-            </div>
+            <GuardBanner
+              kind="blocked"
+              title="Blocked before any action ran"
+              body={
+                hiddenExcerpt(guard)
+                  ? `${guard.explanation} We removed hidden instructions.`
+                  : guard.explanation
+              }
+              score={guard.score}
+              evidence={hiddenExcerpt(guard)}
+            />
           ) : null}
           {guard.verdict === "sanitize" ? (
-            <div className="ib-hold mb-4 px-4 py-3">
-              <span className="ib-guard ib-guard--flagged">Flagged</span>
-              <p className="mt-1 text-[13px] text-[var(--text-secondary)]">Readable, with the suspicious part removed. Actions stay off until you confirm.</p>
-            </div>
+            <GuardBanner
+              kind="flagged"
+              title="Flagged before a reply was offered"
+              body="Readable, with the suspicious part removed. Actions stay off until you confirm."
+              score={guard.score}
+            />
           ) : null}
           {email.assessment.guardDown ? (
-            <div className="ib-banner mb-4 px-4 py-3" role="alert">
-              <p className="text-[16px] font-semibold">Guard unavailable. Nothing was sent.</p>
-              <p className="mt-2 text-[13px] leading-5 text-[var(--text-secondary)]">
-                Inbox Bodyguard failed closed. This letter is held, and every tool call is denied until the guard can run.
-              </p>
-            </div>
+            <GuardBanner
+              kind="blocked"
+              title="Guard unavailable. Nothing was sent."
+              body="The assistant is paused until the guard is back."
+            />
           ) : null}
           <div className="whitespace-pre-wrap text-[14px] leading-[22px]">{guard.sanitizedText || email.text}</div>
           {guard.revealedText && guard.revealedText !== guard.sanitizedText ? (
@@ -258,30 +283,7 @@ function Reading({ email, onChanged }: { email: EmailView; onChanged: () => void
               <p className="ib-reveal whitespace-pre-wrap text-[13px]">{guard.revealedText.slice(0, 700)}</p>
             </div>
           ) : null}
-          {pending ? (
-            <div className="ib-hold mt-6 p-4">
-              <div className="flex items-center gap-2">
-                <span className="ib-action ib-action--pending">Pending</span>
-                <span className="text-[14px] font-medium">{pending.title}</span>
-              </div>
-              <p className="mt-2 text-[13px] text-[var(--text-secondary)]">{pending.detail}</p>
-              {editing ? (
-                <textarea className="ib-input mt-3 h-28 py-2" value={draft} onChange={(event) => setDraft(event.target.value)} />
-              ) : draft ? (
-                <pre className="mt-3 whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--surface-sunken)] p-3 text-[13px]">{draft}</pre>
-              ) : null}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" className="ib-btn ib-btn-approve" disabled={!ready} onClick={() => act(pending, "approved")}>
-                  {pending.type === "delete" ? "Approve delete" : pending.type === "forward" ? "Approve forward" : "Approve & send"}
-                  <span className="ib-kbd">⌘↵</span>
-                </button>
-                <button type="button" className="ib-btn ib-btn-secondary" onClick={() => setEditing((value) => !value)}>Edit</button>
-                <button type="button" className="ib-btn ib-btn-ghost" onClick={() => act(pending, "denied")}>Discard</button>
-              </div>
-              {!ready ? <p className="mt-2 text-[12px] text-[var(--text-tertiary)]">Approval stays off until the output guard finishes.</p> : null}
-              {error ? <p className="mt-2 text-[12px] text-[var(--guard-blocked)]" role="alert">{error}</p> : null}
-            </div>
-          ) : null}
+          {error ? <p className="mt-3 text-[12px] text-[var(--guard-blocked)]" role="alert">{error}</p> : null}
           {note || email.decisions.length > 0 ? (
             <p className="mt-4 text-[13px] text-[var(--text-secondary)]" role="status">
               Recorded on this machine. No mail was transmitted.
@@ -309,7 +311,20 @@ function Reading({ email, onChanged }: { email: EmailView; onChanged: () => void
           </div>
         </div>
       </article>
-      <Assistant email={email} steps={steps} ready={ready} open={assist} onClose={() => setAssist(false)} />
+      <Assistant
+        email={email}
+        steps={steps}
+        ready={ready}
+        open={assist}
+        onClose={() => setAssist(false)}
+        pending={pending}
+        draft={draft}
+        editing={editing}
+        onDraft={setDraft}
+        onEdit={() => setEditing((value) => !value)}
+        onAct={(decision) => pending && act(pending, decision)}
+        error={error}
+      />
     </>
   );
 }
@@ -320,26 +335,65 @@ function Assistant({
   ready,
   open,
   onClose,
+  pending,
+  draft,
+  editing,
+  onDraft,
+  onEdit,
+  onAct,
+  error,
 }: {
   email: EmailView;
   steps: TraceStep[];
   ready: boolean;
   open: boolean;
   onClose: () => void;
+  pending?: ProposedAction;
+  draft: string;
+  editing: boolean;
+  onDraft: (value: string) => void;
+  onEdit: () => void;
+  onAct: (decision: "approved" | "denied") => void;
+  error: string | null;
 }) {
   const [scanNote, setScanNote] = useState<string | null>(null);
   return (
     <aside className="ib-assist" data-open={open ? "true" : "false"}>
       <div className="flex h-[52px] items-center justify-between px-4">
-        <div className="text-[13px] font-medium">What happened</div>
+        <div className="text-[13px] font-medium">Assistant</div>
         <button type="button" className="ib-btn ib-btn-ghost ib-btn-sm xl:hidden" onClick={onClose}>Close</button>
       </div>
       <div className="ib-scroll flex-1 px-4 pb-4">
+        {pending ? (
+          <div className={`ib-action mb-3 ${pending.needsApproval ? "ib-action--pending" : ""}`}>
+            <div className="ib-action-head">
+              <Sparkles className="ib-icon" aria-hidden="true" />
+              <span className="text-[13px] font-medium">{pending.title}</span>
+              <span className="ib-tag ib-tag--pending ml-auto"><span className="dot" />Needs approval</span>
+            </div>
+            <div className="ib-action-body">
+              {pending.to ? <p className="ib-mono mb-2">{pending.to}</p> : null}
+              {editing ? (
+                <textarea className="ib-textarea" value={draft} onChange={(event) => onDraft(event.target.value)} />
+              ) : (
+                <p className="whitespace-pre-wrap">{draft || pending.detail}</p>
+              )}
+            </div>
+            <div className="ib-action-foot">
+              <button type="button" className="ib-btn ib-btn-primary" disabled={!ready} onClick={() => onAct("approved")}>
+                {pending.type === "delete" ? "Approve delete" : pending.type === "forward" ? "Approve forward" : "Approve & send"}
+              </button>
+              <button type="button" className="ib-btn ib-btn-ghost" onClick={onEdit}>Edit</button>
+              <button type="button" className="ib-btn ib-btn-ghost" onClick={() => onAct("denied")}>Discard</button>
+            </div>
+          </div>
+        ) : null}
         <p className="text-[13px] leading-5 text-[var(--text-secondary)]">{email.assessment.assistant.summary}</p>
+        {error ? <p className="mt-2 text-[12px] text-[var(--guard-blocked)]" role="alert">{error}</p> : null}
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="ib-model ib-model--guard"><span className="ib-model-glyph"><Shield className="h-2.5 w-2.5" /></span><b>Guard</b><span className="ib-model-meta">Nano</span></span>
-          <span className="ib-model ib-model--memory"><span className="ib-model-glyph"><Brain aria-hidden="true" /></span><b>Memory</b><span className="ib-model-meta">SQLite</span></span>
-          <span className="ib-model ib-model--reason"><span className="ib-model-glyph"><Sparkles className="h-2.5 w-2.5" /></span><b>Assistant</b><span className="ib-model-meta">Nano</span></span>
+          <span className="ib-model ib-model--guard"><span className="ib-model-glyph" /><b>Guard</b><span className="ib-model-meta">Nano</span></span>
+          <span className="ib-model ib-model--memory"><span className="ib-model-glyph" /><b>Memory</b><span className="ib-model-meta">SQLite</span></span>
+          <span className="ib-model ib-model--reason"><span className="ib-model-glyph" /><b>Assistant</b><span className="ib-model-meta">Nano</span></span>
         </div>
         <ol className="mt-4 flex flex-col gap-3" aria-live="polite">
           {steps.map((step, index) => (
@@ -370,7 +424,47 @@ function Assistant({
   );
 }
 
+function hiddenExcerpt(guard: EmailView["assessment"]["guard"]): string | null {
+  const finding = guard.findings.find((item) =>
+    ["hidden_text", "html_comment", "invisible_chars", "encoded_payload"].includes(item.category),
+  );
+  return finding?.excerpt || null;
+}
+
+function GuardBanner({
+  kind,
+  title,
+  body,
+  score,
+  evidence,
+}: {
+  kind: "blocked" | "flagged";
+  title: string;
+  body: string;
+  score?: number;
+  evidence?: string | null;
+}) {
+  return (
+    <div className={`ib-guard ib-guard--${kind} mb-4`} role="status">
+      <ShieldX className="icon" aria-hidden="true" />
+      <div className="ib-guard-title">{title}</div>
+      {score != null ? <span className="ib-model ib-model--guard">guard · {score.toFixed(2)}</span> : null}
+      <p className="ib-guard-body">{body}</p>
+      {evidence ? (
+        <div className="ib-evidence">
+          <mark>{evidence}</mark>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function VerdictChip({ verdict }: { verdict: string }) {
   const kind = verdict === "quarantine" ? "blocked" : verdict === "sanitize" ? "flagged" : "safe";
-  return <span className={`ib-guard ib-guard--${kind}`}>{verdictLabel(verdict)}</span>;
+  return (
+    <span className={`ib-tag ib-tag--${kind}`}>
+      <span className="dot" aria-hidden="true" />
+      {verdictLabel(verdict)}
+    </span>
+  );
 }

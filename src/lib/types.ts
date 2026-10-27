@@ -48,6 +48,22 @@ export type TraceStep = {
   decision?: "allow" | "deny" | "held" | "info";
 };
 
+/** Token counts from one Token Factory response, or from a cache hit. */
+export type ModelUsage = {
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  cached: boolean;
+};
+
+/** Estimated price of one letter, using the catalog rates in the spend ledger. */
+export type LetterCost = {
+  usd: number;
+  calls: number;
+  cached: number;
+  note: string;
+};
+
 export type ClassifierJudgment = {
   verdict: Verdict;
   categories: string[];
@@ -55,9 +71,10 @@ export type ClassifierJudgment = {
   explanation: string;
   spans: string[];
   model: string;
-  mode: "demo-canned" | "demo-mirror" | "live" | "skipped" | "unavailable";
+  mode: "demo-canned" | "demo-mirror" | "live" | "skipped" | "unavailable" | "fallback";
   /** Present on live calls: cache, token cap, reasoning recovery. */
   usageNote?: string;
+  usage?: ModelUsage;
 };
 
 export type GuardResult = {
@@ -82,6 +99,7 @@ export type SandboxResult = {
   complied: boolean;
   actions: ProposedAction[];
   note: string;
+  usage?: ModelUsage;
 };
 
 export type DemoAssistant = {
@@ -127,6 +145,7 @@ export type Assessment = {
   trace: TraceStep[];
   scanMode: "demo" | "live";
   guardDown: boolean;
+  cost: LetterCost;
 };
 
 export type ActionDecision = {
@@ -148,6 +167,8 @@ export type MemoryContact = {
   organization: string;
   trust: "trusted" | "known";
   notes: string;
+  /** directory: seeded. you: added from the memory screen, never from a letter. */
+  source?: "directory" | "you";
 };
 
 export type MemoryPreference = {

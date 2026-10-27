@@ -33,7 +33,9 @@ flowchart LR
   exfil --> gate[Policy and approval]
 ```
 
-The reader returns amounts, dates, and a short ask. It does not return tools. The planner's prompt contains those fields inside a datamark, not the raw letter. Send, forward, and delete always wait. A recipient who is not you, the sender, or a saved contact is denied. Markdown images, links that were not in the letter, and query strings are stripped before a tool can use them.
+The reader returns amounts, dates, and a short ask. It does not return tools. The planner's prompt contains those fields inside a datamark, not the raw letter. Send, forward, and delete always wait. A recipient who is not you, the sender, or a saved contact is denied. A contact you add yourself counts. Markdown images, links that were not in the letter, and query strings are stripped before a tool can use them. A masked check then drops memory writes and exfiltration without a second model call.
+
+A demo trace says no Token Factory call was made. A live trace shows an estimated cost from the same rate table as the spend ledger. Cache hits are not charged again.
 
 Memory is local SQLite. Contacts are a directory, not something a letter can write. Preferences show that you wrote them. A memory instruction inside mail is blocked.
 
@@ -119,14 +121,14 @@ Demo mode is the hosted default. Do not set `LLM_ENABLED` or `BODYGUARD_ALLOW_LI
 
 ### One box on Render
 
-`Dockerfile` builds the Next app. `render.yaml` runs it on the free plan, with `DEMO_MODE=true`, `LLM_ENABLED=false`, a health check on `GET /api/health`, and a 1 GB disk at `/data`.
+`Dockerfile` builds a standalone Next app and runs it as a non-root user. `render.yaml` uses the free plan, with `DEMO_MODE=true`, `LLM_ENABLED=false`, `PUBLIC_DEMO=true`, and `TRUST_PROXY=1`. The free plan has no disk, so the SQLite file is `/tmp/bodyguard.db` and the sample inbox is reseeded on restart. Liveness is `GET /api/healthz` (`{ok:true}`, no I/O). Readiness is `GET /api/readyz` (`{ok, mode, llm}` only).
 
 1. Push the repo and create a Render Blueprint from `render.yaml`, or a new Web Service using the Dockerfile.
-2. Leave the live-call variables unset.
-3. Open the service URL. The sample inbox is reseeded on boot if the disk is empty. With the disk mounted, decisions and preferences survive restarts.
-4. Ping `GET /api/health` from an outside cron if the free instance sleeps.
+2. Leave the live-call variables unset. `TRUST_PROXY=1` is set because Render appends the client address. The limiter uses only the right-most forwarding hop, and only when that flag is `1`.
+3. Open the service URL. Decisions on the free plan do not survive a restart. To keep the spend hard stop across restarts, set Upstash (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) or Turso (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`). If either pair is set and the store cannot be reached, live calls stay off.
+4. Ping `GET /api/healthz` from an outside cron if the free instance sleeps.
 
-SQLite paths: `BODYGUARD_DB=/data/bodyguard.db` and `BODYGUARD_CACHE_PATH=/data/llm-cache.json`.
+The completion cache lives in the SQLite `llm_cache` table. `BODYGUARD_CACHE_PATH` is unused.
 
 ### Web UI on Vercel, API on Render
 
@@ -135,14 +137,20 @@ SQLite paths: `BODYGUARD_DB=/data/bodyguard.db` and `BODYGUARD_CACHE_PATH=/data/
 1. Deploy the API with Render, as above. Note its URL.
 2. Import the same repo on Vercel. Framework preset is Next.js.
 3. Set `NEXT_PUBLIC_API_BASE` to the Render origin, with no trailing slash, and `NEXT_PUBLIC_SITE_URL` to the Vercel origin.
-4. On Render, set `CORS_ORIGINS` to the Vercel origin. Leave `TRUST_PROXY` unset unless you know the proxy.
+4. On Render, set `CORS_ORIGINS` to the Vercel origin. Keep `TRUST_PROXY=1` on Render. Leave it unset anywhere the process sees the client socket directly.
 5. Redeploy the Vercel project so the public URL is baked into the client.
 
 Vercel’s filesystem is ephemeral. Do not point `BODYGUARD_DB` at Vercel if Render is the API. The API owns the database.
 
-IMAP stays off unless you set `INBOX_SOURCE=imap` and call `POST /api/inbox/sync` with the header `x-admin-secret`. There is no SMTP. Approval never sends mail.
+Each browser gets an `ib-session` cookie. Approvals, reset, and memory edits apply to that session. The sample letters stay shared. Nothing in the demo requires a login.
 
-Hugging Face Spaces can run the same Dockerfile. Set the same environment variables and the health path to `/api/health`. Spaces also has an ephemeral disk unless you attach persistent storage.
+IMAP stays off on the public demo. It runs only when `PUBLIC_DEMO=false`, `ADMIN_SECRET` is set, `INBOX_SOURCE=imap`, and the IMAP host, user, and password are set. `POST /api/inbox/sync` then returns 202 and a job id. Otherwise it returns 409. Public inbox reads never include `source=imap` rows. There is no SMTP. Approval never sends mail.
+
+Hugging Face Spaces can run the same Dockerfile. Set the same environment variables and the health path to `/api/healthz`. Spaces also has an ephemeral disk unless you attach persistent storage.
+
+`/api/v1/*` is the same API as `/api/*`. Errors are `{ error, code, requestId }` with `error` a string. `code` is one of `RATE_LIMITED`, `BAD_INPUT`, `LLM_UNAVAILABLE`, `BUDGET_PAUSED`, `NOT_FOUND`, `INTERNAL`.
+
+GitHub Actions runs typecheck, lint, unit tests, the offline eval, and the production build on pull requests and on `main`. Branch protection for `main` has to be turned on in the repository settings. This change cannot set that from a read-only token.
 
 ## Limits
 
@@ -158,5 +166,5 @@ What worked, what the catalog was missing, and what we would turn on with a key:
 
 - A safety-judge model id on Token Factory would replace the prompted Nano judge. None was in the public catalog on 25 Oct 2026.
 - Nano is the right default for classify and triage. Super is only useful when a live judgment is unsure and the budget is healthy.
-- Reasoning models can spend the whole token cap before `content` arrives. The client reads `reasoning_content` once and does not retry.
+- Reasoning models can spend the whole token cap before `content` arrives. The client reads `reasoning_content` once and does not retry that empty answer. Transport failures (429, 5xx, timeout) retry once inside a 22 second deadline. A circuit breaker stops further spend while it is open.
 - The spend ledger, the cache, and `LLM_ENABLED` are there because a public demo cannot afford an open model loop.

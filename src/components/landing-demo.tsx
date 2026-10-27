@@ -117,7 +117,7 @@ export function LandingDemo() {
         </div>
         <div id="verdict" data-show={showVerdict ? "true" : "false"} className="order-1 border-b border-[var(--border)] bg-[var(--surface)] px-5 py-4 sm:order-3 sm:border-t sm:border-b-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="ib-guard ib-guard--blocked">Blocked</span>
+            <span className="ib-tag ib-tag--blocked"><span className="dot" aria-hidden="true" />Blocked</span>
             <span className="ib-sev" data-level="4" aria-hidden="true">
               <i /><i /><i /><i />
             </span>

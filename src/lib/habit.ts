@@ -25,7 +25,7 @@ export function morningBrief(emails: EmailView[]): BriefLine[] {
       detail: firstReply
         ? `${replies.length} letter${replies.length === 1 ? "" : "s"}. First: ${firstReply.subject}.`
         : "Nothing is waiting on a reply.",
-      href: firstReply ? `/inbox` : undefined,
+      href: firstReply ? `/inbox?letter=${firstReply.id}` : undefined,
     },
     {
       label: "Deadlines",

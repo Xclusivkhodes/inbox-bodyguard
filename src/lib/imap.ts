@@ -16,8 +16,12 @@ export async function pullImap(): Promise<Fixture[]> {
     secure: process.env.IMAP_SECURE !== "0",
     auth: { user, pass },
     logger: false,
+    socketTimeout: 15_000,
   });
-  await client.connect();
+  await Promise.race([
+    client.connect(),
+    new Promise((_, reject) => setTimeout(() => reject(new Error("IMAP connect timed out.")), 10_000)),
+  ]);
   const lock = await client.getMailboxLock("INBOX");
   const out: Fixture[] = [];
   try {
@@ -25,7 +29,9 @@ export async function pullImap(): Promise<Fixture[]> {
     const total = status ? (status.messages ?? 0) : 0;
     if (!total) return [];
     const from = Math.max(1, total - 19);
+    const deadline = Date.now() + 60_000;
     for await (const message of client.fetch(`${from}:*`, { source: true, uid: true })) {
+      if (Date.now() > deadline) break;
       if (!message.source) continue;
       const parsed = await simpleParser(message.source);
       const fromValue = parsed.from?.value?.[0];
