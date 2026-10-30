@@ -30,8 +30,15 @@ function looksLikeIp(value: string): boolean {
   return value.includes(":") && /^[0-9a-f:]+$/i.test(value);
 }
 
-/** Right-most hop, and only when a trusted proxy appended it. */
+/**
+ * Right-most hop, and only when a trusted proxy appended it. On Vercel the
+ * edge overwrites x-real-ip with the client address, so a caller cannot spoof it.
+ */
 export function clientIp(request: Request): string {
+  if (process.env.VERCEL === "1") {
+    const real = request.headers.get("x-real-ip")?.trim();
+    if (real && looksLikeIp(real)) return real;
+  }
   if (process.env.TRUST_PROXY !== "1") return "direct";
   const forwarded = request.headers.get("x-forwarded-for");
   if (!forwarded) return "direct";

@@ -25,6 +25,20 @@ describe("rate limit", () => {
     delete process.env.TRUST_PROXY;
   });
 
+  it("uses the address Vercel's edge sets, and ignores it elsewhere", () => {
+    const request = new Request("http://localhost/api/inbox", {
+      headers: { "x-real-ip": "198.51.100.9", "x-forwarded-for": "203.0.113.8" },
+    });
+    delete process.env.TRUST_PROXY;
+    delete process.env.VERCEL;
+    assert.equal(clientIp(request), "direct");
+    process.env.VERCEL = "1";
+    assert.equal(clientIp(request), "198.51.100.9");
+    const bad = new Request("http://localhost/api/inbox", { headers: { "x-real-ip": "nope" } });
+    assert.equal(clientIp(bad), "direct");
+    delete process.env.VERCEL;
+  });
+
   it("drops idle addresses so the map cannot grow without bound", () => {
     resetLimits();
     for (let i = 0; i < 2100; i += 1) {
