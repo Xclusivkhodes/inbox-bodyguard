@@ -130,6 +130,10 @@ Demo mode is the hosted default. Do not set `LLM_ENABLED` or `BODYGUARD_ALLOW_LI
 
 The completion cache lives in the SQLite `llm_cache` table. `BODYGUARD_CACHE_PATH` is unused.
 
+### All on Vercel (demo mode)
+
+Import the repo on Vercel with no environment variables. The UI and the API routes are served from the same origin. On Vercel the SQLite file is `/tmp/bodyguard.db`, and the sample inbox is reseeded on each cold start, the same as the Render free plan. Each function instance has its own copy, so a queue approval can vanish after a cold start. The rate limiter reads `x-real-ip`, which Vercel's edge sets, so `TRUST_PROXY` is not needed. Live AI stays off until the spend cap has a Redis store (see `docs/AI_SPEND_CAP.md`).
+
 ### Web UI on Vercel, API on Render
 
 `vercel.json` is the frontend project. The browser calls `NEXT_PUBLIC_API_BASE` when it is set, and the same origin when it is empty.

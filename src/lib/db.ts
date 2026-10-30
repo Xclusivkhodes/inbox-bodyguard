@@ -4,8 +4,14 @@ import { DatabaseSync } from "node:sqlite";
 
 const globalForDb = globalThis as unknown as { bodyguardDb?: DatabaseSync; bodyguardDbPath?: string };
 
+/**
+ * Vercel functions have a read-only bundle and a writable /tmp. The sample
+ * inbox is reseeded into /tmp on a cold start, the same as the Render free plan.
+ */
 export function databasePath(): string {
-  return process.env.BODYGUARD_DB || path.join(process.cwd(), "data", "bodyguard.db");
+  if (process.env.BODYGUARD_DB) return process.env.BODYGUARD_DB;
+  if (process.env.VERCEL) return path.join("/tmp", "bodyguard.db");
+  return path.join(process.cwd(), "data", "bodyguard.db");
 }
 
 function columnNames(db: DatabaseSync, table: string): string[] {
