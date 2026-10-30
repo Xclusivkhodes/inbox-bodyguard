@@ -22,7 +22,7 @@ export default function HomePage() {
       <div className="mx-auto grid max-w-[1280px] items-start gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_600px] lg:gap-16 lg:px-8 lg:pt-16">
         <section className="lg:pt-8">
           <p className="inline-flex h-8 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] pr-3 pl-1 text-[12px] text-[var(--text-secondary)]">
-            <span className="inline-flex h-6 items-center rounded-full border border-[var(--accent-border)] px-2 text-[11px] font-medium text-[var(--accent)]">Demo</span>
+            <span className="inline-flex h-6 items-center rounded-full border border-[var(--accent-border)] px-2 text-[12px] font-medium text-[var(--accent)]">Demo</span>
             Prompt-injection guard, on every email
           </p>
           <h1 className="ib-display mt-6 text-[40px] leading-[44px] tracking-[-0.02em] sm:text-[56px] sm:leading-[60px] lg:text-[72px] lg:leading-[76px]">

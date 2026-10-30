@@ -122,9 +122,6 @@ kbd, .ib-kbd { font: 500 11px/1 var(--font-mono); min-width: 18px; height: 18px;
 .ib-log time { font: 400 11px/1.4 var(--font-mono); color: var(--text-tertiary); }
 
 /* ---------- toggles ---------- */
-.ib-switch { position: relative; width: 28px; height: 16px; border-radius: var(--radius-full); background: var(--border-strong); border: 0; cursor: pointer; transition: background-color var(--duration-base) var(--ease-standard); }
-.ib-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform var(--duration-base) var(--ease-emphasized); }
-.ib-switch[aria-checked="true"] { background: var(--accent); } .ib-switch[aria-checked="true"]::after { transform: translateX(12px); }
 .ib-tabs { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-md); background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
 .ib-tabs button { height: 24px; padding: 0 8px; border: 0; border-radius: var(--radius-sm); background: none; font: 500 var(--text-xs-size)/1 var(--font-sans); color: var(--text-tertiary); cursor: pointer; }
 .ib-tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
@@ -191,3 +188,45 @@ kbd, .ib-kbd { font: 500 11px/1 var(--font-mono); min-width: 18px; height: 18px;
 .ib-avatar { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font: 600 12px/1 var(--font-sans); background: var(--surface-selected); color: var(--text-secondary); border: 1px solid var(--border); flex: none; }
 .ib-guard .icon, .ib-guard .ib-icon { width: 16px; height: 16px; stroke-width: 1.5; color: var(--_solid); margin-top: 2px; }
 .ib-action-foot { justify-content: flex-end; }
+
+/* ---------- theme toggle icons: one at a time ---------- */
+.ib-theme-sun { display: none; }
+[data-theme="dark"] .ib-theme-sun, .dark .ib-theme-sun { display: block; }
+[data-theme="dark"] .ib-theme-moon, .dark .ib-theme-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ib-theme-sun { display: block; }
+  :root:not([data-theme="light"]) .ib-theme-moon { display: none; }
+}
+
+/* ---------- segmented control (landing demo) ---------- */
+.ib-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-md); background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
+.ib-seg button { height: 28px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: none; font: 500 var(--text-xs-size)/1 var(--font-sans); color: var(--text-tertiary); cursor: pointer; white-space: nowrap; }
+.ib-seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+[data-theme="dark"] .ib-seg button[aria-pressed="true"] { background: var(--surface-selected); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ib-seg button[aria-pressed="true"] { background: var(--surface-selected); } }
+.ib-example { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--radius-full); font: 500 var(--text-xs-size)/1 var(--font-sans); color: var(--text-tertiary); border: 1px dashed var(--border-strong); }
+
+/* ---------- mobile menu links ---------- */
+.ib-nav { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: var(--radius-md); color: var(--text); font-weight: 500; text-decoration: none; }
+.ib-nav:hover { background: var(--surface-hover); }
+
+/* ---------- touch screens and phones ----------
+   The desktop UI is dense on purpose. On a phone every control grows to a
+   44px target, inputs use 16px text so iOS does not zoom, and the smallest
+   labels step up to 12px. */
+@media (max-width: 767px), (pointer: coarse) {
+  :root { --text-2xs-size: 0.75rem; }
+  .ib-btn, .ib-btn-sm { --_h: 44px; }
+  .ib-btn-lg { --_h: 48px; }
+  .ib-input { height: 44px; font-size: 16px; }
+  .ib-input, .ib-textarea, .ib-btn-secondary { border-color: var(--border-strong); }
+  .ib-textarea, select.ib-input { font-size: 16px; }
+  .ib-theme-toggle { width: 44px; height: 44px; }
+  .ib-theme-toggle svg { width: 18px; height: 18px; }
+  .ib-tabs button, .ib-seg button { height: 40px; padding: 0 12px; }
+  .ib-nav-item { height: 44px; }
+  .ib-model, .ib-model-meta, .ib-count, .ib-row .time, .ib-log time, .ib-step-node, kbd, .ib-kbd { font-size: 12px; }
+  .ib-logo-link, .ib-tap-link { min-height: 44px; }
+  .ib-decision { height: 22px; font-size: 12px; }
+  .ib-footer-nav a { display: inline-flex; align-items: center; min-height: 44px; }
+}

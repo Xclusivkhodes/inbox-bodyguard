@@ -111,7 +111,7 @@ export function MemoryScreen({ initial }: { initial: MemoryPayload }) {
           >
             <input className="ib-input sm:w-40" value={contactName} onChange={(event) => setContactName(event.target.value)} aria-label="Contact name" placeholder="Name" />
             <input className="ib-input sm:w-56" value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} aria-label="Contact email" placeholder="name@example.com" inputMode="email" />
-            <input className="ib-input flex-1" value={contactOrg} onChange={(event) => setContactOrg(event.target.value)} aria-label="Organisation" placeholder="Organisation" />
+            <input className="ib-input w-full sm:w-auto sm:flex-1" value={contactOrg} onChange={(event) => setContactOrg(event.target.value)} aria-label="Organisation" placeholder="Organisation" />
             <button className="ib-btn ib-btn-secondary" type="submit" disabled={saving}>Add contact</button>
           </form>
         </section>
@@ -123,7 +123,7 @@ export function MemoryScreen({ initial }: { initial: MemoryPayload }) {
             {data.preferences.map((item) => (
               <li key={item.key}>
                 <button type="button" className="ib-row-button" aria-label={`Edit preference ${item.key}`} onClick={() => beginEdit(item)}>
-                  <div className="ib-mono text-[11px] text-[var(--text-tertiary)]">{item.key} · you wrote this</div>
+                  <div className="ib-mono text-[12px] text-[var(--text-tertiary)]">{item.key} · you wrote this</div>
                   <p className="mt-1 whitespace-pre-wrap text-[13px]">{item.value}</p>
                 </button>
               </li>
@@ -153,7 +153,7 @@ export function MemoryScreen({ initial }: { initial: MemoryPayload }) {
             }}
           >
             <input className="ib-input sm:w-40" value={key} onChange={(event) => setKey(event.target.value)} aria-label="Preference name" />
-            <input ref={valueRef} className="ib-input flex-1" value={value} onChange={(event) => setValue(event.target.value)} placeholder="New value" aria-label="Preference value" />
+            <input ref={valueRef} className="ib-input w-full sm:w-auto sm:flex-1" value={value} onChange={(event) => setValue(event.target.value)} placeholder="New value" aria-label="Preference value" />
             <button className="ib-btn ib-btn-primary" type="submit" disabled={saving}>Save preference</button>
           </form>
         </section>

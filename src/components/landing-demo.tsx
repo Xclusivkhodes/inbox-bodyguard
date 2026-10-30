@@ -82,10 +82,10 @@ export function LandingDemo() {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--border-strong)]" />
           </div>
           <div className="ib-seg ml-auto" role="group" aria-label="View">
-            <button type="button" aria-pressed={view === "human"} className="!h-7 !text-[12px]" onClick={() => setView("human")}>
+            <button type="button" aria-pressed={view === "human"} onClick={() => setView("human")}>
               What you see
             </button>
-            <button type="button" aria-pressed={view === "ai"} className="!h-7 !text-[12px]" onClick={() => setView("ai")}>
+            <button type="button" aria-pressed={view === "ai"} onClick={() => setView("ai")}>
               What the AI reads
             </button>
           </div>
@@ -138,7 +138,7 @@ export function LandingDemo() {
               <b>forward</b>
               <span className="ib-model-meta">denied</span>
             </span>
-            <Link href="/inbox" className="ml-auto text-[12px] font-medium text-[var(--text-link)]">
+            <Link href="/inbox" className="ib-tap-link ml-auto inline-flex items-center text-[12px] font-medium text-[var(--text-link)]">
               Open the sample inbox
             </Link>
           </div>
