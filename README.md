@@ -87,7 +87,7 @@ A live call needs all of the following, and spend under the hard limit:
 - `NEBIUS_API_KEY` set
 - the ledger readable, and the admin pause off
 
-`LLM_ENABLED` defaults off. Cache hits do not call the API. Past 70% of `SPEND_BUDGET_USD` only Nano runs. Past 90% paid calls stop and the demo or the cache is served. If the guard cannot finish, the letter is held and no tool runs.
+`LLM_ENABLED` defaults off. Cache hits do not call the API. `AI_SPEND_CAP_USD` (default $0.30) is a hard cap: every live call reserves its worst-case cost first and is refused if that would pass the cap, then the demo or the cache is served. Past 70% of the cap only Nano runs. See [docs/AI_SPEND_CAP.md](docs/AI_SPEND_CAP.md). If the guard cannot finish, the letter is held and no tool runs.
 
 Prices used for the ledger, per million tokens, catalog of 25 Oct 2026:
 

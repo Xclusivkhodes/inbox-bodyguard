@@ -9,6 +9,7 @@ import {
   SUPER_MODEL,
 } from "./config";
 import { getDb } from "./db";
+import { aiCapReachedSync, lastKnownAiSpendUsd } from "./ai-spend-cap";
 import { addRemoteSpend, noteRemoteSpend, remoteSpendState, spendBackend } from "./spend-remote";
 import type { LetterCost, ModelUsage } from "./types";
 
@@ -107,12 +108,14 @@ export function budgetStatus(): BudgetStatus {
       throw new Error("Spend ledger is unavailable.");
     }
     const row = getDb().prepare("SELECT value FROM meta WHERE key = 'spend_usd'").get() as { value?: string } | undefined;
-    const spent = remote.active ? Number(remote.spent) : Number(row?.value ?? 0);
+    const ledger = remote.active ? Number(remote.spent) : Number(row?.value ?? 0);
+    const spent = Math.max(ledger, lastKnownAiSpendUsd());
     const pausedByAdmin = adminPaused();
     const soft = spent >= budget * 0.7;
-    const hard = spent >= budget * 0.9;
+    // The cap itself is the hard stop. Each live call also reserves its worst case first (ai-spend-cap.ts).
+    const hard = spent >= budget || aiCapReachedSync();
     let banner: string | null = null;
-    if (hard) banner = "Live AI paused, showing cached demo";
+    if (hard) banner = "AI spend cap reached. Live AI is off, showing the cached demo.";
     else if (pausedByAdmin) banner = "Live AI is paused.";
     else if (soft) banner = "Spend is near the cap. New calls use Nemotron Nano only.";
     return {

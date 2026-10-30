@@ -1,7 +1,16 @@
 const KEY = "inbox-bodyguard:spend_usd";
 
+/** Upstash directly, or the same Redis added through Vercel's KV / Upstash integration. */
+function redisUrl(): string | undefined {
+  return process.env.UPSTASH_REDIS_REST_URL?.trim() || process.env.KV_REST_API_URL?.trim() || undefined;
+}
+
+function redisToken(): string | undefined {
+  return process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || process.env.KV_REST_API_TOKEN?.trim() || undefined;
+}
+
 export function spendBackend(): "sqlite" | "upstash" | "turso" {
-  if (process.env.UPSTASH_REDIS_REST_URL?.trim() && process.env.UPSTASH_REDIS_REST_TOKEN?.trim()) return "upstash";
+  if (redisUrl() && redisToken()) return "upstash";
   if (process.env.TURSO_DATABASE_URL?.trim() && process.env.TURSO_AUTH_TOKEN?.trim()) return "turso";
   return "sqlite";
 }
@@ -23,11 +32,11 @@ export function markRemoteBroken(): void {
 }
 
 async function upstash(command: unknown[]): Promise<unknown> {
-  const url = process.env.UPSTASH_REDIS_REST_URL!.trim().replace(/\/$/, "");
+  const url = redisUrl()!.replace(/\/$/, "");
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+      Authorization: `Bearer ${redisToken()}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(command),
