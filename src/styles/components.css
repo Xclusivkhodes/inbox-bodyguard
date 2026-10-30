@@ -214,8 +214,8 @@ kbd, .ib-kbd { font: 500 11px/1 var(--font-mono); min-width: 18px; height: 18px;
    The desktop UI is dense on purpose. On a phone every control grows to a
    44px target, inputs use 16px text so iOS does not zoom, and the smallest
    labels step up to 12px. */
-@media (max-width: 767px), (pointer: coarse) {
-  :root { --text-2xs-size: 0.75rem; }
+@media (max-width: 1023px), (pointer: coarse) {
+  .ib-eyebrow { font-size: 12px; }
   .ib-btn, .ib-btn-sm { --_h: 44px; }
   .ib-btn-lg { --_h: 48px; }
   .ib-input { height: 44px; font-size: 16px; }
@@ -223,10 +223,11 @@ kbd, .ib-kbd { font: 500 11px/1 var(--font-mono); min-width: 18px; height: 18px;
   .ib-textarea, select.ib-input { font-size: 16px; }
   .ib-theme-toggle { width: 44px; height: 44px; }
   .ib-theme-toggle svg { width: 18px; height: 18px; }
-  .ib-tabs button, .ib-seg button { height: 40px; padding: 0 12px; }
+  .ib-tabs button, .ib-seg button { height: 44px; padding: 0 12px; }
   .ib-nav-item { height: 44px; }
   .ib-model, .ib-model-meta, .ib-count, .ib-row .time, .ib-log time, .ib-step-node, kbd, .ib-kbd { font-size: 12px; }
   .ib-logo-link, .ib-tap-link { min-height: 44px; }
   .ib-decision { height: 22px; font-size: 12px; }
+  .ib-text-link { display: inline-flex; align-items: center; min-height: 44px; }
   .ib-footer-nav a { display: inline-flex; align-items: center; min-height: 44px; }
 }
