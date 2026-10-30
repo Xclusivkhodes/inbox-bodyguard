@@ -306,8 +306,8 @@ function Reading({
             </div>
           ) : null}
           <div className="mt-6 flex flex-wrap gap-2 text-[12px]">
-            <Link className="text-[var(--text-link)]" href={`/guard/${email.id}`}>Guard result</Link>
-            <Link className="text-[var(--text-link)]" href={`/evidence/${email.id}`}>Evidence</Link>
+            <Link className="ib-text-link text-[var(--text-link)]" href={`/guard/${email.id}`}>Guard result</Link>
+            <Link className="ib-text-link text-[var(--text-link)]" href={`/evidence/${email.id}`}>Evidence</Link>
           </div>
         </div>
       </article>

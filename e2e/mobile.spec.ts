@@ -100,3 +100,26 @@ test.describe("phone flows", () => {
     await expect(ai).toHaveAttribute("aria-pressed", "true");
   });
 });
+
+test.describe("tablet-width window without touch emulation", () => {
+  test.use({ viewport: { width: 768, height: 1024 } });
+
+  test("app controls and labels still use touch sizes below 1024px", async ({ page }) => {
+    await page.goto("/queue");
+    await ready(page);
+    await minTarget(page, 'button[aria-label="Open menu"]');
+    const buttons = await page.locator("main .ib-btn:visible").evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().height)),
+    );
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const height of buttons) expect(height).toBeGreaterThanOrEqual(44);
+    const eyebrow = await page.locator(".ib-eyebrow").first().evaluate((node) => parseFloat(getComputedStyle(node).fontSize));
+    expect(eyebrow).toBeGreaterThanOrEqual(12);
+    await page.goto("/memory");
+    await ready(page);
+    const inputs = await page.locator("main .ib-input:visible").evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().height)),
+    );
+    for (const height of inputs) expect(height).toBeGreaterThanOrEqual(44);
+  });
+});
