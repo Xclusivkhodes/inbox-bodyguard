@@ -117,7 +117,7 @@ export function InboxClient({ filter, letter }: { filter?: string; letter?: stri
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="truncate text-[13px] font-medium">{email.fromName}</span>
-                  <span className="ib-mono shrink-0 text-[11px] text-[var(--text-tertiary)]">{formatWhen(email.receivedAt)}</span>
+                  <span className="ib-mono shrink-0 text-[12px] text-[var(--text-tertiary)]">{formatWhen(email.receivedAt)}</span>
                 </div>
                 <div className="mt-0.5 truncate text-[13px]">{email.subject}</div>
                 <div className="mt-1 truncate text-[12px] text-[var(--text-tertiary)]">{previewText(email.assessment.assistant.summary || email.text)}</div>

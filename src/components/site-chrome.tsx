@@ -18,7 +18,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-2 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center" aria-label="Inbox Bodyguard">
+        <Link href="/" className="ib-logo-link flex min-w-0 items-center" aria-label="Inbox Bodyguard">
           <Lockup height={26} />
           <span className="sr-only">Inbox Bodyguard</span>
         </Link>
@@ -36,7 +36,7 @@ export function SiteHeader() {
           </Link>
           <button
             type="button"
-            className="ib-btn ib-btn-ghost ib-btn-sm md:hidden"
+            className="ib-btn ib-btn-ghost ib-btn-sm ib-btn-icon md:hidden"
             aria-expanded={open}
             aria-controls="site-menu"
             onClick={() => setOpen((value) => !value)}
@@ -73,7 +73,7 @@ export function SiteFooter() {
     <footer className="border-t border-[var(--border)]">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 py-8 text-[13px] text-[var(--text-secondary)] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>Inbox Bodyguard. Sample mail stays on this machine. Nothing is transmitted.</p>
-        <nav className="flex flex-wrap gap-4" aria-label="Footer">
+        <nav className="ib-footer-nav flex flex-wrap gap-x-5" aria-label="Footer">
           <Link href="/how" className="hover:text-[var(--text)]">How it works</Link>
           <Link href="/security" className="hover:text-[var(--text)]">Security</Link>
           <Link href="/privacy" className="hover:text-[var(--text)]">Privacy</Link>

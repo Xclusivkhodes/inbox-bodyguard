@@ -29,7 +29,7 @@ export function BriefScreen() {
                 <li key={item.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <p className="text-[14px] font-medium">{item.who} has been waiting {item.days} days</p>
                   <p className="mt-1 text-[13px] text-[var(--text-secondary)]">{item.subject}</p>
-                  <Link href={`/inbox?letter=${item.id}`} className="mt-2 inline-flex text-[13px] font-medium text-[var(--text-link)]">Open the letter</Link>
+                  <Link href={`/inbox?letter=${item.id}`} className="ib-tap-link mt-2 inline-flex items-center text-[13px] font-medium text-[var(--text-link)]">Open the letter</Link>
                 </li>
               ))
             )}
@@ -42,7 +42,7 @@ export function BriefScreen() {
               <h2 className="mt-1 text-[16px] font-semibold">{line.label}</h2>
               <p className="mt-1 text-[14px] leading-6 text-[var(--text-secondary)]">{line.detail}</p>
               {line.href ? (
-                <Link href={line.href} className="mt-3 inline-flex text-[13px] font-medium text-[var(--text-link)]">
+                <Link href={line.href} className="ib-tap-link mt-3 inline-flex items-center text-[13px] font-medium text-[var(--text-link)]">
                   Open
                 </Link>
               ) : null}

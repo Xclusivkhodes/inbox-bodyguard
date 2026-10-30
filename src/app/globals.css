@@ -1,6 +1,8 @@
 @import "../styles/tokens.css";
-@import "../styles/components.css";
 @import "tailwindcss";
+/* Component classes sit in Tailwind's components layer: above the preflight
+   reset, below utilities, so `hidden` and `sm:inline-flex` win on .ib-btn. */
+@import "../styles/components.css" layer(components);
 
 /* Mirrors tailwind.config.js darkMode: class, data-theme, and the OS.
    data-theme="light" or .light wins over a dark system setting. */

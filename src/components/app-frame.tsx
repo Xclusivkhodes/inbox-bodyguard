@@ -194,9 +194,9 @@ export function AppFrame({ children, initial }: { children: React.ReactNode; ini
                 <Stat label="blocked" value={counts?.blocked} tone="var(--guard-blocked)" />
               </div>
               {data?.meta.budget.banner ? (
-                <p className="mt-2 text-[11px] leading-4 text-[var(--text-secondary)]">{data.meta.budget.banner}</p>
+                <p className="mt-2 text-[12px] leading-4 text-[var(--text-secondary)]">{data.meta.budget.banner}</p>
               ) : (
-                <p className="mt-2 text-[11px] leading-4 text-[var(--text-tertiary)]">
+                <p className="mt-2 text-[12px] leading-4 text-[var(--text-tertiary)]">
                   Demo mode. {data ? `$${data.meta.budget.spentUsd.toFixed(2)} of $${data.meta.budget.budgetUsd.toFixed(2)}` : "Loading spend"}
                 </p>
               )}
@@ -205,7 +205,7 @@ export function AppFrame({ children, initial }: { children: React.ReactNode; ini
               <span className="ib-avatar" style={{ background: "#3f3f46" }}>AR</span>
               <div className="min-w-0 leading-tight">
                 <div className="truncate text-[13px] font-medium">Alex Rivera</div>
-                <div className="truncate text-[11px] text-[var(--text-tertiary)]">alex@northline.io</div>
+                <div className="truncate text-[12px] text-[var(--text-tertiary)]">alex@northline.io</div>
               </div>
               <ThemeToggle />
             </div>
@@ -214,7 +214,7 @@ export function AppFrame({ children, initial }: { children: React.ReactNode; ini
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <a className="ib-skip" href="#main">Skip to content</a>
           <div className="flex h-12 items-center gap-2 border-b border-[var(--border)] px-3 lg:hidden">
-            <button type="button" className="ib-btn ib-btn-ghost ib-btn-sm" onClick={() => setMenu(true)} aria-label="Open menu">
+            <button type="button" className="ib-btn ib-btn-ghost ib-btn-sm ib-btn-icon" onClick={() => setMenu(true)} aria-label="Open menu">
               <Menu className="ib-icon" />
             </button>
             <span className="text-[13px] font-medium">Inbox Bodyguard</span>
@@ -248,7 +248,7 @@ function Stat({ label, value, tone }: { label: string; value?: number; tone: str
   return (
     <div className="rounded-md bg-[var(--surface-sunken)] py-1.5">
       <div className="ib-mono text-[13px] font-semibold" style={{ color: tone }}>{value ?? "–"}</div>
-      <div className="text-[10px] text-[var(--text-tertiary)]">{label}</div>
+      <div className="text-[12px] text-[var(--text-tertiary)]">{label}</div>
     </div>
   );
 }
