@@ -3,6 +3,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { ZodType } from "zod";
 
 import { assertLiveOptIn, baseURL, EMAIL_BODY_CAP, HARD_TOKEN_CEILING, isSuperModel } from "./config";
+import { estimatePromptTokens, reserveSpend, settleSpend, SpendCapError, type Reservation } from "./ai-spend-cap";
 import { assertSpendAllowed, recordSpend } from "./budget";
 import { chatCacheKey, completionCap, readCached, writeCached } from "./llm-cache";
 import { LimitError, withLiveSlot } from "./limits";
@@ -14,6 +15,14 @@ export class NebiusError extends Error {
     super(message);
     this.name = "NebiusError";
     this.status = status;
+  }
+}
+
+/** The AI spend cap would be passed by this call. The pipeline shows the demo result instead. */
+export class SpendCapReachedError extends NebiusError {
+  constructor(message: string) {
+    super(message, 409);
+    this.name = "SpendCapReachedError";
   }
 }
 
@@ -203,6 +212,8 @@ async function postCompletion(
   apiKey: string,
   model: string,
   purpose: string,
+  /** Called before retrying after a timeout or network error, because that attempt may have been billed. */
+  beforeBlindRetry?: () => Promise<void>,
 ): Promise<CompletionPayload> {
   const slot = budgetStore.getStore();
   const timeoutMs = isSuperModel(model) ? 15_000 : 8_000;
@@ -248,6 +259,7 @@ async function postCompletion(
         throw lastError;
       }
       noteFailure();
+      if (beforeBlindRetry && !(error instanceof NebiusError && error.status !== 504)) await beforeBlindRetry();
       await sleep(backoffMs(attempt, null), slot?.deadline);
     }
   }
@@ -329,11 +341,30 @@ export async function nebiusChat(options: {
     body.chat_template_kwargs = { enable_thinking: false };
   }
 
+  // Hard cap: reserve the worst case (prompt estimate + max_tokens) before anything is sent.
+  const promptEstimate = estimatePromptTokens(options.system + liveUser);
+  const reserve = async (): Promise<Reservation> => {
+    try {
+      return await reserveSpend(options.model, promptEstimate, cap);
+    } catch (error) {
+      if (error instanceof SpendCapError) throw new SpendCapReachedError(error.message);
+      throw error;
+    }
+  };
+  const reservation = await reserve();
+  // A blind retry after a timeout keeps the first reservation and takes a new one.
+  const extraReservations: Reservation[] = [];
+  const beforeBlindRetry = async () => {
+    extraReservations.push(await reserve());
+  };
+
   const started = Date.now();
   let payload: CompletionPayload;
   try {
-    payload = await withLiveSlot(() => postCompletion(body, apiKey, options.model, purpose));
+    payload = await withLiveSlot(() => postCompletion(body, apiKey, options.model, purpose, beforeBlindRetry));
   } catch (error) {
+    // Keep the worst-case reservation: a timed-out request may still have been billed.
+    await settleSpend(reservation, null);
     if (error instanceof BreakerOpenError || breakerOpen()) throw new BreakerOpenError();
     logLlm({
       model: options.model,
@@ -347,6 +378,13 @@ export async function nebiusChat(options: {
     });
     throw error;
   }
+
+  await settleSpend(
+    reservation,
+    payload.usage?.prompt_tokens != null && payload.usage?.completion_tokens != null
+      ? { promptTokens: payload.usage.prompt_tokens, completionTokens: payload.usage.completion_tokens }
+      : null,
+  );
 
   const message = payload.choices?.[0]?.message;
   const rawContent = messageText(message?.content).trim();

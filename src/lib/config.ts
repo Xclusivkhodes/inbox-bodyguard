@@ -1,3 +1,5 @@
+import { aiSpendCapUsd, DEFAULT_AI_SPEND_CAP_USD } from "./ai-spend-cap";
+
 /**
  * Model IDs checked against the Nebius Token Factory catalog on 25 Oct 2026:
  * https://tokenfactory.nebius.com/model-catalog.md
@@ -25,7 +27,7 @@ export const DEFAULT_VISION_MODEL = "nvidia/Nemotron-3.5-Super-VL";
 /** Global completion ceiling. Role caps are tighter: guard 300, triage 500, Super 1000. */
 export const DEFAULT_MAX_TOKENS = 1024;
 export const HARD_TOKEN_CEILING = 1024;
-export const DEFAULT_BUDGET_USD = 1;
+export const DEFAULT_BUDGET_USD = DEFAULT_AI_SPEND_CAP_USD;
 export const EMAIL_BODY_CAP = 4000;
 export const PASTE_CAP = 2000;
 
@@ -91,10 +93,9 @@ export function llmEnabled(): boolean {
   return flag === "1" || flag === "true" || flag === "yes";
 }
 
+/** The hard AI spend cap (AI_SPEND_CAP_USD). See ai-spend-cap.ts. */
 export function budgetUsd(): number {
-  const raw = Number(process.env.SPEND_BUDGET_USD);
-  if (Number.isFinite(raw) && raw > 0) return raw;
-  return DEFAULT_BUDGET_USD;
+  return aiSpendCapUsd();
 }
 
 /** Completion-token cap for a single Token Factory request. */
